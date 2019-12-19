@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "parcel serve src/index.html --out-dir demo",
-    "build-demo": "rm -rf demo/* && parcel build src/index.html --out-dir dist",
-    "build": "rm -rf dist/* && parcel build src/js/splash.js --global BGPSplash"
+    "build": "rm -rf dist/* && parcel build src/js/splash.js --global BGPSplash --out-dir dist",
+    "build-demo": "rm -rf demo/* && parcel build src/index.html --out-dir demo"
   },
   "keywords": [],
   "author": "",
