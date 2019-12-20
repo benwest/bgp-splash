@@ -70,8 +70,8 @@ module.exports = ({
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = container.offsetWidth * window.devicePixelRatio;
-    canvas.height = container.offsetHeight * window.devicePixelRatio;
+    canvas.width = ( container.offsetWidth || 1 ) * window.devicePixelRatio;
+    canvas.height = ( container.offsetHeight || 1 ) * window.devicePixelRatio;
     canvas.style.width = '100%';
     canvas.style.height = '100%';
     container.appendChild( canvas );

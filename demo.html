@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <script src='./dist/splash.js'></script>
+    <script>
+        BGPSplash({
+            container: document.body,
+            logoURL: './src/assets/logo.svg',
+            videoURL: './src/assets/video.mp4',
+            imageURL: './src/assets/image.jpg',
+            options: {
+                rows: 18,
+                moveDuration: 1,
+                stopDuration: 3,
+                backgroundOffset: 0.5,
+            },
+            onExitStart: function () { console.log('start'); },
+            onExitComplete: function () { console.log('complete'); },
+        });
+    </script>
+</body>
+</html>

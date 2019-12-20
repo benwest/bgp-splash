@@ -4,9 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "parcel serve src/index.html --out-dir demo",
-    "build": "rm -rf dist/* && parcel build src/js/splash.js --global BGPSplash --out-dir dist",
-    "build-demo": "rm -rf demo/* && parcel build src/index.html --out-dir demo"
+    "start": "parcel serve src/index.html --out-dir dist",
+    "build": "rm -rf dist/* && parcel build src/js/splash.js --global BGPSplash --out-file splash.min.js && parcel build src/js/splash.js --global BGPSplash --out-dir dist --no-minify"
   },
   "keywords": [],
   "author": "",
