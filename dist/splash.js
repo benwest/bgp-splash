@@ -2317,6 +2317,10 @@ var coverCanvas = function coverCanvas(ctx, image) {
   ctx.drawImage(image, offset[0], offset[1], scaledImageSize[0], scaledImageSize[1]);
 };
 
+var drawImageClamped = function drawImageClamped(ctx, image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
+  ctx.drawImage(image, Math.max(sx, 0), Math.max(sy, 0), Math.min(sWidth, image.width - sx), Math.min(sHeight, image.width - sy), dx, dy, dWidth, dHeight);
+};
+
 module.exports = function (_ref2) {
   var _ref2$container = _ref2.container,
       container = _ref2$container === void 0 ? document.body : _ref2$container,
@@ -2361,7 +2365,7 @@ module.exports = function (_ref2) {
 
     var maxBlockWidth = Math.max.apply(Math, (0, _toConsumableArray2.default)(blocks.map(_aabb.default.w)));
     var backgroundOffsets = blocks.map(function () {
-      return (0, _vec.default)(Math.random() * maxBackgroundOffset * backgroundOffset, Math.random() * maxBackgroundOffset * backgroundOffset);
+      return (0, _vec.default)((Math.random() * 2 - 1) * maxBackgroundOffset * backgroundOffset, (Math.random() * 2 - 1) * maxBackgroundOffset * backgroundOffset);
     });
 
     var render = function render(t, transparent) {
@@ -2412,7 +2416,7 @@ module.exports = function (_ref2) {
           ox = _backgroundOffsets$i[0],
           oy = _backgroundOffsets$i[1];
 
-      ctx.drawImage(backgroundCanvas, maxBackgroundOffset + _aabb.default.x(block) + ox, maxBackgroundOffset + _aabb.default.y(block) + oy, _aabb.default.w(block), _aabb.default.h(block), _aabb.default.x(block), _aabb.default.y(block), _aabb.default.w(block), _aabb.default.h(block));
+      drawImageClamped(ctx, backgroundCanvas, _aabb.default.x(block) + ox, _aabb.default.y(block) + oy, _aabb.default.w(block), _aabb.default.h(block), _aabb.default.x(block), _aabb.default.y(block), _aabb.default.w(block), _aabb.default.h(block));
     });
   };
 

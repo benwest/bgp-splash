@@ -53,6 +53,17 @@ const coverCanvas = ( ctx, image ) => {
     ctx.drawImage( image, offset[ 0 ], offset[ 1 ], scaledImageSize[ 0 ], scaledImageSize[ 1 ] );
 }
 
+const drawImageClamped = ( ctx, image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight ) => {
+    ctx.drawImage(
+        image,
+        Math.max( sx, 0 ),
+        Math.max( sy, 0 ),
+        Math.min( sWidth, image.width - sx ),
+        Math.min( sHeight, image.width - sy ),
+        dx, dy, dWidth, dHeight
+    )
+}
+
 module.exports = ({
     container = document.body,
     logoURL,
@@ -88,8 +99,8 @@ module.exports = ({
         const maxBlockWidth = Math.max( ...blocks.map( aabb.w ) );
         const backgroundOffsets = blocks.map( () => 
             vec2(
-                Math.random() * maxBackgroundOffset * backgroundOffset,
-                Math.random() * maxBackgroundOffset * backgroundOffset
+                ( Math.random() * 2 - 1 ) * maxBackgroundOffset * backgroundOffset,
+                ( Math.random() * 2 - 1 ) * maxBackgroundOffset * backgroundOffset
             )
         )
         const render = ( t, transparent ) => draw(
@@ -141,10 +152,11 @@ module.exports = ({
         }
         blocks.forEach( ( block, i ) => {
             const [ ox, oy ] = backgroundOffsets[ i ];
-            ctx.drawImage(
+            drawImageClamped(
+                ctx,
                 backgroundCanvas,
-                maxBackgroundOffset + aabb.x( block ) + ox,
-                maxBackgroundOffset + aabb.y( block ) + oy,
+                aabb.x( block ) + ox,
+                aabb.y( block ) + oy,
                 aabb.w( block ),
                 aabb.h( block ),
                 aabb.x( block ),
@@ -154,7 +166,5 @@ module.exports = ({
             )
         })
     }
-
     return load().then( start );
-
 }
