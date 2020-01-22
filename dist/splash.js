@@ -1986,7 +1986,7 @@ var sample = function sample(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 };
 
-var baseLogoBlocks = [_aabb.default.xywh((0, _vec.default)(179, 0), (0, _vec.default)(204, 60)), _aabb.default.xywh((0, _vec.default)(0, 60), (0, _vec.default)(360, 60)), _aabb.default.xywh((0, _vec.default)(179, 120), (0, _vec.default)(275, 60))].map(function (box) {
+var baseLogoBlocks = [_aabb.default.xywh((0, _vec.default)(188, 0), (0, _vec.default)(213, 60)), _aabb.default.xywh((0, _vec.default)(0, 60), (0, _vec.default)(373, 60)), _aabb.default.xywh((0, _vec.default)(188, 120), (0, _vec.default)(280, 60))].map(function (box) {
   return _aabb.default.scale(box, 1 / 60);
 });
 var baseLogoSize = (0, _vec.default)(Math.max.apply(Math, (0, _toConsumableArray2.default)(baseLogoBlocks.map(_aabb.default.r))), Math.max.apply(Math, (0, _toConsumableArray2.default)(baseLogoBlocks.map(_aabb.default.b))));

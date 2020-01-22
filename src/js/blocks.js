@@ -3,9 +3,9 @@ import aabb from './utils/aabb';
 
 const sample = arr => arr[ Math.floor( Math.random() * arr.length ) ];
 const baseLogoBlocks = [
-    aabb.xywh( vec2( 179, 0 ), vec2( 204, 60 ) ),
-    aabb.xywh( vec2( 0, 60 ), vec2( 360, 60 ) ),
-    aabb.xywh( vec2( 179, 120 ), vec2( 275, 60 ) )
+    aabb.xywh( vec2( 188, 0 ), vec2( 213, 60 ) ),
+    aabb.xywh( vec2( 0, 60 ), vec2( 373, 60 ) ),
+    aabb.xywh( vec2( 188, 120 ), vec2( 280, 60 ) )
 ].map( box => aabb.scale( box, 1/60 ) );
 const baseLogoSize = vec2(
     Math.max( ...baseLogoBlocks.map( aabb.r ) ),
