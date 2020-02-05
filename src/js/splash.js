@@ -6,6 +6,8 @@ import canAutoplay from 'can-autoplay';
 import tween from './utils/tween';
 import quadIn from 'eases/quad-in';
 
+const sleep = ms => new Promise( resolve => setTimeout( resolve, ms ) );
+
 const loadImage = src => new Promise( ( resolve, reject ) => {
     const image = new Image();
     image.addEventListener( 'load', () => resolve( image ) )
@@ -95,6 +97,7 @@ module.exports = ({
     ])
 
     const start = ([ logoImage, backgroundImage ]) => {
+
         const { blocks, logoRect } = createBlocks( [ canvas.width, canvas.height ], rowHeight );
         const maxBlockWidth = Math.max( ...blocks.map( aabb.w ) );
         const backgroundOffsets = blocks.map( () => 
@@ -103,20 +106,38 @@ module.exports = ({
                 ( Math.random() * 2 - 1 ) * maxBackgroundOffset * backgroundOffset
             )
         )
-        const render = ( t, transparent ) => draw(
-            ctx,
-            logoImage,
-            logoRect,
-            offsetBlocks( t, blocks, maxBlockWidth, canvas.width ),
-            backgroundImage,
-            backgroundOffsets,
-            transparent
-        );
-        return tween( moveDuration * 1000, t => render( quadIn( 1 - t ) ) )
-            .then( () => tween( stopDuration * 1000, () => render( 0 ) ) )
+
+        let t = 1;
+        let transparent = false;
+        let frame = null;
+        let tick = () => {
+            draw(
+                ctx,
+                logoImage,
+                logoRect,
+                offsetBlocks( t, blocks, maxBlockWidth, canvas.width ),
+                backgroundImage,
+                backgroundOffsets,
+                transparent
+            )
+            frame = requestAnimationFrame( tick );
+        }
+
+        tick();
+
+        const clicked = new Promise( resolve => {
+            canvas.addEventListener( 'click', resolve );
+        })
+
+        return tween( moveDuration * 1000, tIn => { t = quadIn( 1 - tIn ) } )
+            .then( () => Promise.race([
+                sleep( stopDuration * 1000 ),
+                clicked
+            ]))
             .then( () => {
                 onExitStart();
-                return tween( moveDuration * 1000, t => render( quadIn( t ), true ) )
+                transparent = true;
+                return tween( moveDuration * 1000, tOut => { t = quadIn( tOut ) } ) 
             })
             .then( () => {
                 if ( backgroundImage instanceof HTMLVideoElement ) {
@@ -124,7 +145,8 @@ module.exports = ({
                     backgroundImage.removeAttribute('src');
                     backgroundImage.load();
                 }
-                container.removeChild( canvas )
+                cancelAnimationFrame( frame );
+                container.removeChild( canvas );
                 onExitComplete()
             })
     }

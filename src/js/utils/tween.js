@@ -3,7 +3,7 @@ const tween = ( duration, onTick ) => new Promise( resolve => {
     const tick = () => {
         const now = Date.now();
         const ms = now - startTime;
-        onTick( ms / duration, ms );
+        onTick( Math.min( ms / duration, 1 ), ms );
         if ( now > startTime + duration ) {
             resolve();
         } else {

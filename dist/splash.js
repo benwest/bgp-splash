@@ -2210,7 +2210,7 @@ var tween = function tween(duration, onTick) {
     var tick = function tick() {
       var now = (0, _now.default)();
       var ms = now - startTime;
-      onTick(ms / duration, ms);
+      onTick(Math.min(ms / duration, 1), ms);
 
       if (now > startTime + duration) {
         resolve();
@@ -2255,6 +2255,12 @@ var _tween = _interopRequireDefault(require("./utils/tween"));
 var _quadIn = _interopRequireDefault(require("eases/quad-in"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var sleep = function sleep(ms) {
+  return new _promise.default(function (resolve) {
+    return setTimeout(resolve, ms);
+  });
+};
 
 var loadImage = function loadImage(src) {
   return new _promise.default(function (resolve, reject) {
@@ -2367,21 +2373,28 @@ module.exports = function (_ref2) {
     var backgroundOffsets = blocks.map(function () {
       return (0, _vec.default)((Math.random() * 2 - 1) * maxBackgroundOffset * backgroundOffset, (Math.random() * 2 - 1) * maxBackgroundOffset * backgroundOffset);
     });
+    var t = 1;
+    var transparent = false;
+    var frame = null;
 
-    var render = function render(t, transparent) {
-      return draw(ctx, logoImage, logoRect, offsetBlocks(t, blocks, maxBlockWidth, canvas.width), backgroundImage, backgroundOffsets, transparent);
+    var tick = function tick() {
+      draw(ctx, logoImage, logoRect, offsetBlocks(t, blocks, maxBlockWidth, canvas.width), backgroundImage, backgroundOffsets, transparent);
+      frame = requestAnimationFrame(tick);
     };
 
-    return (0, _tween.default)(moveDuration * 1000, function (t) {
-      return render((0, _quadIn.default)(1 - t));
+    tick();
+    var clicked = new _promise.default(function (resolve) {
+      canvas.addEventListener('click', resolve);
+    });
+    return (0, _tween.default)(moveDuration * 1000, function (tIn) {
+      t = (0, _quadIn.default)(1 - tIn);
     }).then(function () {
-      return (0, _tween.default)(stopDuration * 1000, function () {
-        return render(0);
-      });
+      return _promise.default.race([sleep(stopDuration * 1000), clicked]);
     }).then(function () {
       onExitStart();
-      return (0, _tween.default)(moveDuration * 1000, function (t) {
-        return render((0, _quadIn.default)(t), true);
+      transparent = true;
+      return (0, _tween.default)(moveDuration * 1000, function (tOut) {
+        t = (0, _quadIn.default)(tOut);
       });
     }).then(function () {
       if (backgroundImage instanceof HTMLVideoElement) {
@@ -2390,6 +2403,7 @@ module.exports = function (_ref2) {
         backgroundImage.load();
       }
 
+      cancelAnimationFrame(frame);
       container.removeChild(canvas);
       onExitComplete();
     });
