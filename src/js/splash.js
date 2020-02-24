@@ -44,24 +44,13 @@ const offsetBlocks = ( t, blocks, maxBlockWidth, canvasWidth ) => {
     })
 }
 
-const coverCanvas = ( ctx, image ) => {
-    const canvasSize = vec2( ctx.canvas.width, ctx.canvas.height );
-    const imageSize = image instanceof HTMLVideoElement
-        ? vec2( image.videoWidth, image.videoHeight )
-        : vec2( image.width, image.height );
-    const scale = vec2.cover( imageSize, canvasSize );
-    const scaledImageSize = vec2.scale( imageSize, scale );
-    const offset = vec2.scale( vec2.sub( canvasSize, scaledImageSize ), .5 );
-    ctx.drawImage( image, offset[ 0 ], offset[ 1 ], scaledImageSize[ 0 ], scaledImageSize[ 1 ] );
-}
-
 const drawImageClamped = ( ctx, image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight ) => {
     ctx.drawImage(
         image,
         Math.max( sx, 0 ),
         Math.max( sy, 0 ),
-        Math.min( sWidth, image.width - sx ),
-        Math.min( sHeight, image.width - sy ),
+        Math.min( sWidth, ( image.videoWidth || image.width ) - sx ),
+        Math.min( sHeight, ( image.videoHeight || image.height ) - sy ),
         dx, dy, dWidth, dHeight
     )
 }
@@ -73,6 +62,7 @@ module.exports = ({
     imageURL,
     onExitStart = () => {},
     onExitComplete = () => {},
+    maxPixelRatio = 1.5,
     options: {
         rows = 20,
         moveDuration = 1,
@@ -81,10 +71,12 @@ module.exports = ({
     }
 }) => {
 
+    const pixelRatio = Math.min( window.devicePixelRatio, maxPixelRatio );
+
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = ( container.offsetWidth || 1 ) * window.devicePixelRatio;
-    canvas.height = ( container.offsetHeight || 1 ) * window.devicePixelRatio;
+    canvas.width = ( container.offsetWidth || 1 ) * pixelRatio;
+    canvas.height = ( container.offsetHeight || 1 ) * pixelRatio;
     canvas.style.width = '100%';
     canvas.style.height = '100%';
     container.appendChild( canvas );
@@ -151,13 +143,14 @@ module.exports = ({
             })
     }
 
-    const backgroundCanvas = document.createElement('canvas');
-    const backgroundCtx = backgroundCanvas.getContext('2d');
-    backgroundCanvas.width = ( container.offsetWidth + maxBackgroundOffset * 2 ) * window.devicePixelRatio;
-    backgroundCanvas.height = ( container.offsetHeight + maxBackgroundOffset * 2 ) * window.devicePixelRatio;
     const draw = ( ctx, logoImage, logoRect, blocks, backgroundImage, backgroundOffsets, transparent ) => {
-
-        coverCanvas( backgroundCtx, backgroundImage );
+        
+        const canvasSize = vec2( canvas.width, canvas.height );
+        const imageSize = backgroundImage instanceof HTMLVideoElement
+            ? vec2( backgroundImage.videoWidth, backgroundImage.videoHeight )
+            : vec2( backgroundImage.width, backgroundImage.height );
+        const imageScale = 1 / vec2.cover( imageSize, canvasSize );
+        const imageOffset = vec2.scale( vec2.sub( imageSize, vec2.scale( canvasSize, imageScale ) ), .5 );
 
         if ( transparent ) {
             ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
@@ -176,15 +169,15 @@ module.exports = ({
             const [ ox, oy ] = backgroundOffsets[ i ];
             drawImageClamped(
                 ctx,
-                backgroundCanvas,
-                aabb.x( block ) + ox,
-                aabb.y( block ) + oy,
-                aabb.w( block ),
-                aabb.h( block ),
+                backgroundImage,
+                ( aabb.x( block ) + ox ) * imageScale + imageOffset[ 0 ],
+                ( aabb.y( block ) + oy ) * imageScale + imageOffset[ 1 ],
+                aabb.w( block ) * imageScale,
+                aabb.h( block ) * imageScale,
                 aabb.x( block ),
                 aabb.y( block ),
-                aabb.w( block ),
-                aabb.h( block )
+                Math.ceil( aabb.w( block ) ),
+                Math.ceil( aabb.h( block ) )
             )
         })
     }

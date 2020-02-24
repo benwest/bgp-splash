@@ -2310,21 +2310,8 @@ var offsetBlocks = function offsetBlocks(t, blocks, maxBlockWidth, canvasWidth) 
   });
 };
 
-var coverCanvas = function coverCanvas(ctx, image) {
-  var canvasSize = (0, _vec.default)(ctx.canvas.width, ctx.canvas.height);
-  var imageSize = image instanceof HTMLVideoElement ? (0, _vec.default)(image.videoWidth, image.videoHeight) : (0, _vec.default)(image.width, image.height);
-
-  var scale = _vec.default.cover(imageSize, canvasSize);
-
-  var scaledImageSize = _vec.default.scale(imageSize, scale);
-
-  var offset = _vec.default.scale(_vec.default.sub(canvasSize, scaledImageSize), .5);
-
-  ctx.drawImage(image, offset[0], offset[1], scaledImageSize[0], scaledImageSize[1]);
-};
-
 var drawImageClamped = function drawImageClamped(ctx, image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
-  ctx.drawImage(image, Math.max(sx, 0), Math.max(sy, 0), Math.min(sWidth, image.width - sx), Math.min(sHeight, image.width - sy), dx, dy, dWidth, dHeight);
+  ctx.drawImage(image, Math.max(sx, 0), Math.max(sy, 0), Math.min(sWidth, (image.videoWidth || image.width) - sx), Math.min(sHeight, (image.videoHeight || image.height) - sy), dx, dy, dWidth, dHeight);
 };
 
 module.exports = function (_ref2) {
@@ -2337,6 +2324,8 @@ module.exports = function (_ref2) {
       onExitStart = _ref2$onExitStart === void 0 ? function () {} : _ref2$onExitStart,
       _ref2$onExitComplete = _ref2.onExitComplete,
       onExitComplete = _ref2$onExitComplete === void 0 ? function () {} : _ref2$onExitComplete,
+      _ref2$maxPixelRatio = _ref2.maxPixelRatio,
+      maxPixelRatio = _ref2$maxPixelRatio === void 0 ? 1.5 : _ref2$maxPixelRatio,
       _ref2$options = _ref2.options,
       _ref2$options$rows = _ref2$options.rows,
       rows = _ref2$options$rows === void 0 ? 20 : _ref2$options$rows,
@@ -2346,10 +2335,11 @@ module.exports = function (_ref2) {
       stopDuration = _ref2$options$stopDur === void 0 ? 4 : _ref2$options$stopDur,
       _ref2$options$backgro = _ref2$options.backgroundOffset,
       backgroundOffset = _ref2$options$backgro === void 0 ? .6 : _ref2$options$backgro;
+  var pixelRatio = Math.min(window.devicePixelRatio, maxPixelRatio);
   var canvas = document.createElement('canvas');
   var ctx = canvas.getContext('2d');
-  canvas.width = (container.offsetWidth || 1) * window.devicePixelRatio;
-  canvas.height = (container.offsetHeight || 1) * window.devicePixelRatio;
+  canvas.width = (container.offsetWidth || 1) * pixelRatio;
+  canvas.height = (container.offsetHeight || 1) * pixelRatio;
   canvas.style.width = '100%';
   canvas.style.height = '100%';
   container.appendChild(canvas);
@@ -2409,13 +2399,13 @@ module.exports = function (_ref2) {
     });
   };
 
-  var backgroundCanvas = document.createElement('canvas');
-  var backgroundCtx = backgroundCanvas.getContext('2d');
-  backgroundCanvas.width = (container.offsetWidth + maxBackgroundOffset * 2) * window.devicePixelRatio;
-  backgroundCanvas.height = (container.offsetHeight + maxBackgroundOffset * 2) * window.devicePixelRatio;
-
   var draw = function draw(ctx, logoImage, logoRect, blocks, backgroundImage, backgroundOffsets, transparent) {
-    coverCanvas(backgroundCtx, backgroundImage);
+    var canvasSize = (0, _vec.default)(canvas.width, canvas.height);
+    var imageSize = backgroundImage instanceof HTMLVideoElement ? (0, _vec.default)(backgroundImage.videoWidth, backgroundImage.videoHeight) : (0, _vec.default)(backgroundImage.width, backgroundImage.height);
+
+    var imageScale = 1 / _vec.default.cover(imageSize, canvasSize);
+
+    var imageOffset = _vec.default.scale(_vec.default.sub(imageSize, _vec.default.scale(canvasSize, imageScale)), .5);
 
     if (transparent) {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -2430,7 +2420,7 @@ module.exports = function (_ref2) {
           ox = _backgroundOffsets$i[0],
           oy = _backgroundOffsets$i[1];
 
-      drawImageClamped(ctx, backgroundCanvas, _aabb.default.x(block) + ox, _aabb.default.y(block) + oy, _aabb.default.w(block), _aabb.default.h(block), _aabb.default.x(block), _aabb.default.y(block), _aabb.default.w(block), _aabb.default.h(block));
+      drawImageClamped(ctx, backgroundImage, (_aabb.default.x(block) + ox) * imageScale + imageOffset[0], (_aabb.default.y(block) + oy) * imageScale + imageOffset[1], _aabb.default.w(block) * imageScale, _aabb.default.h(block) * imageScale, _aabb.default.x(block), _aabb.default.y(block), Math.ceil(_aabb.default.w(block)), Math.ceil(_aabb.default.h(block)));
     });
   };
 
