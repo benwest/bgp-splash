@@ -15,7 +15,7 @@ const loadImage = src => new Promise( ( resolve, reject ) => {
     image.src = src;
 })
 
-const loadVideo = src => {//new Promise( ( resolve, reject ) => {
+const loadVideo = src => {
     const video = document.createElement('video');
     video.muted = true;
     video.setAttribute('muted', 'muted')
@@ -30,7 +30,7 @@ const loadVideo = src => {//new Promise( ( resolve, reject ) => {
     } else {
         return result.then( () => video )
     }
-}//)
+}
 
 const tryLoadVideo = ( src, fallback ) => {
     return canAutoplay.video({ inline: true, muted: true })
