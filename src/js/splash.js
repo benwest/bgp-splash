@@ -15,18 +15,22 @@ const loadImage = src => new Promise( ( resolve, reject ) => {
     image.src = src;
 })
 
-const loadVideo = src => new Promise( resolve => {
+const loadVideo = src => {//new Promise( ( resolve, reject ) => {
     const video = document.createElement('video');
     video.muted = true;
+    video.setAttribute('muted', 'muted')
     video.autoplay = true;
     video.loop = true;
     video.playsInline = true;
-    video.addEventListener( 'canplay', () => {
-        video.play();
-        resolve( video )
-    });
+    video.setAttribute('playsinline', 'playsinline')
     video.src = src;
-})
+    const result = video.play();
+    if ( result === undefined ) {
+        return Promise.resolve( video )
+    } else {
+        return result.then( () => video )
+    }
+}//)
 
 const tryLoadVideo = ( src, fallback ) => {
     return canAutoplay.video({ inline: true, muted: true })

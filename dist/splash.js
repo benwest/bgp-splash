@@ -2274,19 +2274,26 @@ var loadImage = function loadImage(src) {
 };
 
 var loadVideo = function loadVideo(src) {
-  return new _promise.default(function (resolve) {
-    var video = document.createElement('video');
-    video.muted = true;
-    video.autoplay = true;
-    video.loop = true;
-    video.playsInline = true;
-    video.addEventListener('canplay', function () {
-      video.play();
-      resolve(video);
+  //new Promise( ( resolve, reject ) => {
+  var video = document.createElement('video');
+  video.muted = true;
+  video.setAttribute('muted', 'muted');
+  video.autoplay = true;
+  video.loop = true;
+  video.playsInline = true;
+  video.setAttribute('playsinline', 'playsinline');
+  video.src = src;
+  var result = video.play();
+
+  if (result === undefined) {
+    return _promise.default.resolve(video);
+  } else {
+    return result.then(function () {
+      return video;
     });
-    video.src = src;
-  });
-};
+  }
+}; //)
+
 
 var tryLoadVideo = function tryLoadVideo(src, fallback) {
   return _canAutoplay.default.video({
